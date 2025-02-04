@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { api } from "@/trpc/react";
 import { toast } from "sonner";
+import useRefetch from "@/hooks/use-refetch";
 
 type formInput = {
   repoUrl: string;
@@ -19,6 +20,8 @@ export default function CreateProjectForm() {
   // Add Zod validation here
   const CreateProject = api.project.createProject.useMutation();
 
+  const refetch = useRefetch();
+
   function onSubmit(data: formInput) {
     CreateProject.mutate(
       {
@@ -29,6 +32,7 @@ export default function CreateProjectForm() {
       {
         onSuccess: () => {
           toast.success("Project created successfully");
+          refetch();
           reset();
         },
         onError: (error) => {

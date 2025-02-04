@@ -13,6 +13,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import useProject from "@/hooks/use-project";
 import { cn } from "@/lib/utils";
 import {
   BotMessageSquare,
@@ -71,9 +72,10 @@ export function AppSidebar() {
   // Get the current pathname.
   const pathName = usePathname();
   const { open } = useSidebar();
+  const { projects, projectId, setProjectId } = useProject();
 
   return (
-    <Sidebar variant="floating" collapsible="icon">
+    <Sidebar variant="floating" collapsible="icon" className="">
       <SidebarHeader>
         <div
           className={cn(
@@ -119,28 +121,31 @@ export function AppSidebar() {
           <SidebarGroupLabel>Projects</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {projects.map((project) => (
-                <SidebarMenuItem key={project.title}>
-                  <div className="">
-                    <SidebarMenuButton asChild>
-                      <a
-                        href={project.url}
-                        className={cn(
-                          {
-                            "!bg-primary !text-white": pathName === project.url,
-                          },
-                          "list-none",
-                        )}
-                      >
-                        <div className="flex size-6 items-center justify-center rounded bg-primary text-white">
-                          {project.title[0].toUpperCase()}
-                        </div>
-                        {open && <span>{project.title}</span>}
-                      </a>
-                    </SidebarMenuButton>
-                  </div>
-                </SidebarMenuItem>
-              ))}
+              {projects &&
+                projects.map((project) => (
+                  <SidebarMenuItem key={project.id}>
+                    <div className="">
+                      <SidebarMenuButton asChild>
+                        <a
+                          // href={`/project/${project.id}`}
+                          className={cn(
+                            {
+                              "!bg-primary !text-white":
+                                projectId === project.id,
+                            },
+                            "cursor-pointer list-none",
+                          )}
+                          onClick={() => setProjectId(project.id)}
+                        >
+                          <div className="flex size-6 items-center justify-center rounded bg-primary text-white">
+                            {project.name[0].toUpperCase()}
+                          </div>
+                          {open && <span>{project.name}</span>}
+                        </a>
+                      </SidebarMenuButton>
+                    </div>
+                  </SidebarMenuItem>
+                ))}
 
               <div className="h-2"></div>
 
