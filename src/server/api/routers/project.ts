@@ -1,4 +1,5 @@
 import { pollCommits } from "@/lib/github";
+import { checkCredits, indexGithubRepo } from "@/lib/github-loader";
 import {
   createTRPCRouter,
   publicProcedure,
@@ -16,6 +17,29 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.user.userId!,
+        },
+        select: {
+          credits: true,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const currentCredits = user.credits || 0;
+      const fileCount = await checkCredits(
+        input?.githubUrl,
+        input?.githubToken,
+      );
+
+      if (currentCredits < fileCount) {
+        throw new Error("Not enough credits");
+      }
+
       const project = await ctx.db.project.create({
         data: {
           githubUrl: input.githubUrl,
@@ -28,7 +52,20 @@ export const projectRouter = createTRPCRouter({
           },
         },
       });
+
       await pollCommits(project.id);
+      await indexGithubRepo(project.id, input.githubUrl, input?.githubToken);
+
+      await ctx.db.user.update({
+        where: {
+          id: ctx.user.userId!,
+        },
+        data: {
+          credits: {
+            decrement: fileCount, // decrement credits by the number of files
+          },
+        },
+      });
 
       return project;
     }),
@@ -54,5 +91,114 @@ export const projectRouter = createTRPCRouter({
           projectId: input.projectId,
         },
       });
+    }),
+
+  saveAnswer: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        question: z.string(),
+        answer: z.string(),
+        filesReferences: z.any(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.question.create({
+        data: {
+          answer: input.answer,
+          fileReferences: input.filesReferences,
+          projectId: input.projectId,
+          userId: ctx.user.userId!,
+          question: input.question,
+        },
+      });
+    }),
+
+  getQuestions: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.question.findMany({
+        where: {
+          projectId: input.projectId,
+        },
+        include: {
+          user: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }),
+
+  archiveProject: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.project.update({
+        where: {
+          id: input.projectId,
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+    }),
+
+  getTeamMembers: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.userToProject.findMany({
+        where: {
+          projectId: input.projectId,
+        },
+        include: {
+          user: true,
+        },
+      });
+    }),
+
+  getMyCredits: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.user.findUnique({
+      where: {
+        id: ctx.user.userId!,
+      },
+      select: {
+        credits: true,
+      },
+    });
+  }),
+
+  checkCredits: protectedProcedure
+    .input(
+      z.object({
+        githubUrl: z.string(),
+        githubToken: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const fileCount = await checkCredits(input.githubUrl, input?.githubToken);
+      const userCredits = await ctx.db.user.findUnique({
+        where: {
+          id: ctx.user.userId!,
+        },
+        select: {
+          credits: true,
+        },
+      });
+      return {
+        fileCount,
+        userCredits: userCredits?.credits || 0,
+      };
     }),
 });

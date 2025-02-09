@@ -1,3 +1,5 @@
+import QAPageComponent from "@/components/QA/QA";
+
 export default function QAPage() {
-  return <div>Q&A Page</div>;
+  return <QAPageComponent />;
 }

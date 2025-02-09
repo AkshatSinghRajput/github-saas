@@ -1,10 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Document } from "@langchain/core/documents";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-pro",
+  model: "gemini-2.0-flash-exp",
 });
 
 export const summarizeCommits = async (diff: string) => {
@@ -48,19 +47,6 @@ Do not include parts of the example in your summary.`,
 
   return response.response.text();
 };
-
-export async function summarizeCode(doc: Document) {
-  const code = doc.pageContent.slice(0, 10000); // Limit to 10k characters
-
-  const response = await model.generateContent([
-    `You are an expert senior developer who specialises in summarizing code. Summarize the code in less than 100 words but with highest accuracy.
-    ----
-    ${code}
-    ----
-    `,
-  ]);
-  return response.response.text(); // Return the response as a string
-}
 
 export async function generateEmbedding(summary: string) {
   const model = genAI.getGenerativeModel({

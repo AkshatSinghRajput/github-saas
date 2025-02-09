@@ -3,12 +3,20 @@
 import useProject from "@/hooks/use-project";
 import { useUser } from "@clerk/nextjs";
 import { GithubIcon, LinkIcon } from "lucide-react";
-import { useEffect } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import AskQuestion from "./question";
 import UploadMeeting from "./Meeting";
 import CommitLog from "./CommitLog";
+import DeleteProjectButton from "../project/deleteProject";
+// import InviteButton from "../project/inviteButton";
+
+import TeamMembersList from "../project/teamMembers";
+import dynamic from "next/dynamic";
+
+const InviteButton = dynamic(() => import("../project/inviteButton"), {
+  ssr: false,
+});
 
 export default function Dashboard() {
   // this is a custom hook that fetches the user data
@@ -38,16 +46,12 @@ export default function Dashboard() {
 
         {/* Button Icons here for Invite Team Member and Archive */}
         <div className="flex w-full flex-col items-center gap-2 sm:w-auto sm:flex-row sm:gap-4">
-          <Button variant="outline" asChild className="w-full sm:w-auto">
-            <Link href="/invite">
-              <div className="flex items-center gap-2">Invite Team Member</div>
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="w-full sm:w-auto">
-            <Link href="/archive">
-              <div className="flex items-center gap-2">Archive</div>
-            </Link>
-          </Button>
+          {/* <Button variant="outline" asChild className="w-full sm:w-auto">
+            <div className="flex items-center gap-2">Invite Team Member</div>
+          </Button> */}
+          <TeamMembersList></TeamMembersList>
+          <InviteButton></InviteButton>
+          <DeleteProjectButton></DeleteProjectButton>
         </div>
       </div>
       <div className="flex flex-col items-center gap-2 sm:flex-row">
