@@ -56,7 +56,7 @@ export default function Dashboard() {
       </div>
       <div className="flex flex-col items-center gap-2 sm:flex-row">
         <AskQuestion></AskQuestion>
-        <UploadMeeting></UploadMeeting>
+        {/* <UploadMeeting></UploadMeeting> */}
       </div>
       <CommitLog></CommitLog>
     </div>

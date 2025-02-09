@@ -37,11 +37,11 @@ const items = [
     url: "/qa",
     icon: BotMessageSquare,
   },
-  {
-    title: "Meetings",
-    url: "/meetings",
-    icon: PresentationIcon,
-  },
+  // {
+  //   title: "Meetings",
+  //   url: "/meetings",
+  //   icon: PresentationIcon,
+  // },
   {
     title: "Billing",
     url: "/billing",
