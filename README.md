@@ -27,3 +27,10 @@ You can check out the [create-t3-app GitHub repository](https://github.com/t3-os
 ## How do I deploy this?
 
 Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+
+# Things Planned to do:
+## Microservice Architecture for backend
+## Webhook to fetch latest commits from a project
+## Custom branch fetching selection based on the project
+## Sheduler that updates the knowlegde base when any updates recieved on code side
+
